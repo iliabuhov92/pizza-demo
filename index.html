@@ -344,10 +344,10 @@
 </header>
 
 <div class="categories">
-  <button class="cat-btn active" onclick="scrollTo('pizza')">🍕 Пицца</button>
-  <button class="cat-btn" onclick="scrollTo('shaverma')">🌯 Шаверма</button>
-  <button class="cat-btn" onclick="scrollTo('drinks')">🥤 Напитки</button>
-  <button class="cat-btn" onclick="scrollTo('info')">ℹ️ О нас</button>
+  <button class="cat-btn active" onclick="scrollToSection('pizza', this)">🍕 Пицца</button>
+  <button class="cat-btn" onclick="scrollToSection('shaverma', this)">🌯 Шаверма</button>
+  <button class="cat-btn" onclick="scrollToSection('drinks', this)">🥤 Напитки</button>
+  <button class="cat-btn" onclick="scrollToSection('info', this)">ℹ️ О нас</button>
 </div>
 
 <!-- ПИЦЦА -->
@@ -625,10 +625,10 @@
 
   let cart = {};
 
-  function scrollTo(id) {
+  window.scrollToSection = function(id, btn) {
     document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
     document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-    event.target.classList.add('active');
+    btn.classList.add('active');
   }
 
   function addItem(btn, name, price) {
