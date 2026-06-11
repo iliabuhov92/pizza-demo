@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Пицца & Шаверма | Ставрополь</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f5f5;
+      color: #222;
+      padding-bottom: 100px;
+    }
+
+    /* ШАПКА */
+    header {
+      background: #e63012;
+      color: white;
+      padding: 20px 16px 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    header h1 { font-size: 22px; font-weight: 800; }
+    header p { font-size: 13px; opacity: 0.9; margin-top: 2px; }
+    .header-info { display: flex; gap: 16px; margin-top: 8px; font-size: 12px; opacity: 0.85; }
+
+    /* НАВИГАЦИЯ ПО КАТЕГОРИЯМ */
+    .categories {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 12px 16px;
+      background: white;
+      border-bottom: 1px solid #eee;
+      scrollbar-width: none;
+    }
+    .categories::-webkit-scrollbar { display: none; }
+    .cat-btn {
+      white-space: nowrap;
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 2px solid #e63012;
+      background: white;
+      color: #e63012;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .cat-btn.active, .cat-btn:hover {
+      background: #e63012;
+      color: white;
+    }
+
+    /* СЕКЦИИ МЕНЮ */
+    .section { padding: 16px; }
+    .section h2 {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 12px;
+      color: #111;
+    }
+
+    /* КАРТОЧКИ ТОВАРОВ */
+    .items {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+    }
+    .item {
+      background: white;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+      transition: transform 0.15s;
+    }
+    .item:hover { transform: translateY(-2px); }
+    .item-img {
+      width: 100%;
+      height: 130px;
+      object-fit: cover;
+      background: #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+    }
+    .item-body { padding: 10px; }
+    .item-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .item-desc { font-size: 11px; color: #888; margin-bottom: 8px; line-height: 1.4; }
+    .item-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .item-price { font-size: 15px; font-weight: 800; color: #e63012; }
+
+    /* КНОПКА ДОБАВИТЬ */
+    .add-btn {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      background: #e63012;
+      color: white;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s;
+    }
+    .add-btn:hover { background: #c0250e; }
+
+    /* СЧЁТЧИК */
+    .counter {
+      display: none;
+      align-items: center;
+      gap: 6px;
+    }
+    .counter.visible { display: flex; }
+    .counter button {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      border: 2px solid #e63012;
+      background: white;
+      color: #e63012;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700;
+    }
+    .counter span { font-weight: 700; font-size: 15px; min-width: 16px; text-align: center; }
+
+    /* КОРЗИНА ВНИЗУ */
+    .cart-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: #e63012;
+      color: white;
+      padding: 14px 20px;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      z-index: 200;
+      box-shadow: 0 -2px 12px rgba(0,0,0,0.15);
+    }
+    .cart-bar.visible { display: flex; }
+    .cart-bar-left { font-size: 14px; }
+    .cart-bar-left span { font-weight: 800; font-size: 16px; }
+    .cart-bar-right { font-size: 15px; font-weight: 700; }
+
+    /* МОДАЛЬНОЕ ОКНО КОРЗИНЫ */
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 300;
+    }
+    .overlay.visible { display: block; }
+    .cart-modal {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: white;
+      border-radius: 20px 20px 0 0;
+      padding: 20px;
+      z-index: 400;
+      max-height: 80vh;
+      overflow-y: auto;
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+    }
+    .cart-modal.visible { transform: translateY(0); }
+    .cart-modal h2 { font-size: 20px; margin-bottom: 16px; }
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 14px;
+    }
+    .cart-item-name { flex: 1; font-weight: 600; }
+    .cart-item-qty { color: #888; margin: 0 12px; }
+    .cart-item-price { font-weight: 700; color: #e63012; }
+    .cart-total {
+      display: flex;
+      justify-content: space-between;
+      padding: 14px 0 6px;
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    /* ФОРМА */
+    .form-group { margin-top: 14px; }
+    .form-group label { font-size: 13px; color: #555; margin-bottom: 4px; display: block; }
+    .form-group input, .form-group textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 2px solid #eee;
+      border-radius: 10px;
+      font-size: 14px;
+      outline: none;
+      transition: border 0.2s;
+    }
+    .form-group input:focus, .form-group textarea:focus { border-color: #e63012; }
+    .form-group textarea { resize: none; height: 70px; }
+
+    .order-btn {
+      width: 100%;
+      margin-top: 16px;
+      padding: 14px;
+      background: #e63012;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .order-btn:hover { background: #c0250e; }
+
+    .close-btn {
+      position: absolute;
+      top: 16px; right: 20px;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #888;
+    }
+
+    /* ИНФОРМАЦИЯ */
+    .info-section {
+      background: white;
+      margin: 0 16px 16px;
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+    }
+    .info-section h3 { font-size: 15px; font-weight: 700; margin-bottom: 10px; }
+    .info-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #555; margin-bottom: 6px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🍕 Пицца & Шаверма</h1>
+  <p>Быстро, вкусно, с доставкой по Ставрополю</p>
+  <div class="header-info">
+    <span>⏰ Ежедневно 10:00-23:00</span>
+    <span>📍 ул. Чапаева, 4/1е</span>
+  </div>
+</header>
+
+<div class="categories">
+  <button class="cat-btn active" onclick="scrollTo('pizza')">🍕 Пицца</button>
+  <button class="cat-btn" onclick="scrollTo('shaverma')">🌯 Шаверма</button>
+  <button class="cat-btn" onclick="scrollTo('drinks')">🥤 Напитки</button>
+  <button class="cat-btn" onclick="scrollTo('info')">ℹ️ О нас</button>
+</div>
+
+<!-- ПИЦЦА -->
+<div class="section" id="pizza">
+  <h2>🍕 Пицца</h2>
+  <div class="items">
+    <div class="item">
+      <div class="item-img">🍕</div>
+      <div class="item-body">
+        <div class="item-name">Маргарита</div>
+        <div class="item-desc">Томат, моцарелла, базилик</div>
+        <div class="item-footer">
+          <div class="item-price">350 ₽</div>
+          <div class="add-wrap">
+            <button class="add-btn" onclick="addItem(this, 'Маргарита', 350)">+</button>
+            <div class="counter">
+              <button onclick="changeQty(this, -1)">−</button>
+              <span>1</span>
+              <button onclick="changeQty(this, 1)">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="item">
+      <div class="item-img">🍕</div>
+      <div class="item-body">
+        <div class="item-name">Пепперони</div>
+        <div class="item-desc">Томат, пепперони, моцарелла</div>
+        <div class="item-footer">
+          <div class="item-price">420 ₽</div>
+          <div class="add-wrap">
+            <button class="add-btn" onclick="addItem(this, 'Пепперони', 420)">+</button>
+            <div class="counter">
+              <button onclick="changeQty(this, -1)">−</button>
+              <span>1</span>
+              <button onclick="changeQty(this, 1)">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="item">
+      <div class="item-img">🍕</div>
+      <div class="item-body">
+        <div class="item-name">4 сыра</div>
+        <div class="item-desc">Моцарелла, чеддер, пармезан, дор блю</div>
+        <div class="item-footer">
+          <div class="item-price">470 ₽</div>
+          <div class="add-wrap">
+            <button class="add-btn" onclick="addItem(this, '4 сыра', 470)">+</button>
+            <div class="counter">
+              <button onclick="changeQty(this, -1)">−</button>
+              <span>1</span>
+              <button onclick="changeQty(this, 1)">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="item">
+      <div class="item-img">🍕</div>
+      <div class="item-body">
+        <div class="item-name">Ветчина и грибы</div>
+        <div class="item-desc">Томат, ветчина, шампиньоны, сыр</div>
+        <div class="item-footer">
+          <div class="item-price">400 ₽</div>
+          <div class="add-wrap">
+            <button class="add-btn" onclick="addItem(this, 'Ветчина и грибы', 400)">+</button>
+            <div class="counter">
+              <button onclick="changeQty(this, -1)">−</button>
+              <span>1</span>
+              <button onclick="changeQty(this, 1)">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ШАВЕРМА -->
+<div class="section" id="shaverma">
+  <h2>🌯 Шаверма</h2>
+  <div class="items">
+    <div class="item">
+      <div class="item-img">🌯</div>
+      <div class="item-body">
+        <div class="item-name">Классическая</div>
+        <div class="item-desc">Курица, овощи, соус, лаваш</div>
+        <div class="item-footer">
+          <div class="item-price">250 ₽</div>
+          <div class="add-wrap">
+            <button class="add-btn" onclick="addItem(this, 'Шаверма классическая', 250)">+</button>
+            <div class="counter">
+              <button onclick="changeQty(this, -1)">−</button>
+              <span>1</span>
+              <button onclick="changeQty(this, 1)">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="item">
+      <div class="item-img">🌯</div>
+      <div class="item-body">
+        <div class="item-name">Двойная</div>
+        <div class="item-desc">Двойная курица, сыр, соус</div>
+        <div class="item-footer">
+          <div class="item-price">320 ₽</div>
+          <div class="add-wrap">
+            <button class="add-btn" onclick="addItem(this, 'Шаверма двойная', 320)">+</button>
+            <div class="counter">
+              <button onclick="changeQty(this, -1)">−</button>
+              <span>1</span>
+              <button onclick="changeQty(this, 1)">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="item">
+      <div class="item-img">🌯</div>
+      <div class="item-body">
+        <div class="item-name">С говядиной</div>
+        <div class="item-desc">Говядина, овощи, острый соус</div>
+        <div class="item-footer">
+          <div class="item-price">300 ₽</div>
+          <div class="add-wrap">
+            <button class="add-btn" onclick="addItem(this, 'Шаверма с говядиной', 300)">+</button>
+            <div class="counter">
+              <button onclick="changeQty(this, -1)">−</button>
+              <span>1</span>
+              <button onclick="changeQty(this, 1)">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="item">
+      <div class="item-img">🌯</div>
+      <div class="item-body">
+        <div class="item-name">Детская</div>
+        <div class="item-desc">Курица, сыр, без острого</div>
+        <div class="item-footer">
+          <div class="item-price">200 ₽</div>
+          <div class="add-wrap">
+            <button class="add-btn" onclick="addItem(this, 'Шаверма детская', 200)">+</button>
+            <div class="counter">
+              <button onclick="changeQty(this, -1)">−</button>
+              <span>1</span>
+              <button onclick="changeQty(this, 1)">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- НАПИТКИ -->
+<div class="section" id="drinks">
+  <h2>🥤 Напитки</h2>
+  <div class="items">
+    <div class="item">
+      <div class="item-img">🥤</div>
+      <div class="item-body">
+        <div class="item-name">Кола 0.5л</div>
+        <div class="item-desc">Coca-Cola</div>
+        <div class="item-footer">
+          <div class="item-price">100 ₽</div>
+          <div class="add-wrap">
+            <button class="add-btn" onclick="addItem(this, 'Кола 0.5л', 100)">+</button>
+            <div class="counter">
+              <button onclick="changeQty(this, -1)">−</button>
+              <span>1</span>
+              <button onclick="changeQty(this, 1)">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="item">
+      <div class="item-img">🧃</div>
+      <div class="item-body">
+        <div class="item-name">Сок 0.2л</div>
+        <div class="item-desc">Яблоко, апельсин, томат</div>
+        <div class="item-footer">
+          <div class="item-price">80 ₽</div>
+          <div class="add-wrap">
+            <button class="add-btn" onclick="addItem(this, 'Сок 0.2л', 80)">+</button>
+            <div class="counter">
+              <button onclick="changeQty(this, -1)">−</button>
+              <span>1</span>
+              <button onclick="changeQty(this, 1)">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="item">
+      <div class="item-img">💧</div>
+      <div class="item-body">
+        <div class="item-name">Вода 0.5л</div>
+        <div class="item-desc">Негазированная</div>
+        <div class="item-footer">
+          <div class="item-price">60 ₽</div>
+          <div class="add-wrap">
+            <button class="add-btn" onclick="addItem(this, 'Вода 0.5л', 60)">+</button>
+            <div class="counter">
+              <button onclick="changeQty(this, -1)">−</button>
+              <span>1</span>
+              <button onclick="changeQty(this, 1)">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- О НАС -->
+<div id="info" style="padding: 0 0 16px;">
+  <div class="info-section">
+    <h3>ℹ️ Информация</h3>
+    <div class="info-row">📍 ул. Чапаева, 4/1е, Ставрополь</div>
+    <div class="info-row">⏰ Ежедневно с 10:00 до 23:00</div>
+    <div class="info-row">🚗 Доставка по городу</div>
+    <div class="info-row">🏠 Самовывоз</div>
+  </div>
+</div>
+
+<!-- ПОЛОСКА КОРЗИНЫ -->
+<div class="cart-bar" id="cartBar" onclick="openCart()">
+  <div class="cart-bar-left">
+    🛒 Корзина - <span id="cartCount">0</span> позиции
+  </div>
+  <div class="cart-bar-right" id="cartTotal">0 ₽ →</div>
+</div>
+
+<!-- ЗАТЕМНЕНИЕ -->
+<div class="overlay" id="overlay" onclick="closeCart()"></div>
+
+<!-- МОДАЛЬНОЕ ОКНО КОРЗИНЫ -->
+<div class="cart-modal" id="cartModal">
+  <button class="close-btn" onclick="closeCart()">✕</button>
+  <h2>🛒 Ваш заказ</h2>
+  <div id="cartItems"></div>
+  <div class="cart-total">
+    <span>Итого:</span>
+    <span id="cartTotalModal">0 ₽</span>
+  </div>
+  <div class="form-group">
+    <label>Ваше имя</label>
+    <input type="text" id="userName" placeholder="Как вас зовут?">
+  </div>
+  <div class="form-group">
+    <label>Телефон</label>
+    <input type="tel" id="userPhone" placeholder="+7 (___) ___-__-__">
+  </div>
+  <div class="form-group">
+    <label>Доставка или самовывоз?</label>
+    <input type="text" id="userAddress" placeholder="Адрес доставки или «Самовывоз»">
+  </div>
+  <div class="form-group">
+    <label>Комментарий (необязательно)</label>
+    <textarea id="userComment" placeholder="Пожелания к заказу..."></textarea>
+  </div>
+  <button class="order-btn" onclick="sendOrder()">Отправить заказ в Telegram</button>
+</div>
+
+<script>
+  // Замени на Telegram username заведения (без @)
+  const TELEGRAM_USERNAME = 'username_zavedenia';
+
+  let cart = {};
+
+  function scrollTo(id) {
+    document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+  }
+
+  function addItem(btn, name, price) {
+    cart[name] = { price, qty: 1 };
+    const wrap = btn.closest('.add-wrap');
+    btn.style.display = 'none';
+    wrap.querySelector('.counter').classList.add('visible');
+    wrap.querySelector('.counter span').textContent = '1';
+    updateCartBar();
+  }
+
+  function changeQty(btn, delta) {
+    const counter = btn.closest('.counter');
+    const wrap = counter.closest('.add-wrap');
+    const item = wrap.closest('.item');
+    const name = item.querySelector('.item-name').textContent;
+    const span = counter.querySelector('span');
+    let qty = parseInt(span.textContent) + delta;
+
+    if (qty <= 0) {
+      delete cart[name];
+      counter.classList.remove('visible');
+      wrap.querySelector('.add-btn').style.display = 'flex';
+    } else {
+      cart[name].qty = qty;
+      span.textContent = qty;
+    }
+    updateCartBar();
+  }
+
+  function updateCartBar() {
+    const count = Object.values(cart).reduce((s, i) => s + i.qty, 0);
+    const total = Object.values(cart).reduce((s, i) => s + i.price * i.qty, 0);
+    const bar = document.getElementById('cartBar');
+    document.getElementById('cartCount').textContent = count;
+    document.getElementById('cartTotal').textContent = total + ' ₽ →';
+    bar.classList.toggle('visible', count > 0);
+  }
+
+  function openCart() {
+    const items = document.getElementById('cartItems');
+    const total = Object.values(cart).reduce((s, i) => s + i.price * i.qty, 0);
+    items.innerHTML = Object.entries(cart).map(([name, {price, qty}]) => `
+      <div class="cart-item">
+        <div class="cart-item-name">${name}</div>
+        <div class="cart-item-qty">${qty} шт.</div>
+        <div class="cart-item-price">${price * qty} ₽</div>
+      </div>
+    `).join('');
+    document.getElementById('cartTotalModal').textContent = total + ' ₽';
+    document.getElementById('overlay').classList.add('visible');
+    document.getElementById('cartModal').classList.add('visible');
+  }
+
+  function closeCart() {
+    document.getElementById('overlay').classList.remove('visible');
+    document.getElementById('cartModal').classList.remove('visible');
+  }
+
+  function sendOrder() {
+    const name = document.getElementById('userName').value.trim();
+    const phone = document.getElementById('userPhone').value.trim();
+    const address = document.getElementById('userAddress').value.trim();
+    const comment = document.getElementById('userComment').value.trim();
+
+    if (!name || !phone) {
+      alert('Пожалуйста, укажите имя и телефон');
+      return;
+    }
+
+    const total = Object.values(cart).reduce((s, i) => s + i.price * i.qty, 0);
+    const items = Object.entries(cart)
+      .map(([name, {price, qty}]) => `- ${name} x${qty} = ${price * qty} ₽`)
+      .join('\n');
+
+    const text = `🍕 НОВЫЙ ЗАКАЗ\n\n${items}\n\n💰 Итого: ${total} ₽\n\n👤 Имя: ${name}\n📞 Телефон: ${phone}\n📍 Доставка: ${address || 'не указано'}${comment ? '\n💬 Комментарий: ' + comment : ''}`;
+
+    const url = `https://t.me/${TELEGRAM_USERNAME}?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank');
+    closeCart();
+  }
+</script>
+
+</body>
+</html>
