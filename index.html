@@ -16,17 +16,93 @@
 
     /* ШАПКА */
     header {
-      background: #e63012;
-      color: white;
-      padding: 20px 16px 16px;
       position: sticky;
       top: 0;
       z-index: 100;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+      overflow: hidden;
+      background-color: #7a4e35;
     }
-    header h1 { font-size: 22px; font-weight: 800; }
-    header p { font-size: 13px; opacity: 0.9; margin-top: 2px; }
-    .header-info { display: flex; gap: 16px; margin-top: 8px; font-size: 12px; opacity: 0.85; }
+    .header-bricks {
+      position: absolute;
+      inset: 0;
+      background-image:
+        repeating-linear-gradient(
+          transparent 0px, transparent 28px,
+          rgba(0,0,0,0.25) 28px, rgba(0,0,0,0.25) 30px
+        ),
+        repeating-linear-gradient(
+          90deg,
+          transparent 0px, transparent 88px,
+          rgba(0,0,0,0.2) 88px, rgba(0,0,0,0.2) 90px
+        );
+      background-size: 90px 30px;
+    }
+    .header-bricks::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        repeating-linear-gradient(
+          transparent 0px, transparent 28px,
+          rgba(0,0,0,0.25) 28px, rgba(0,0,0,0.25) 30px
+        ),
+        repeating-linear-gradient(
+          90deg,
+          transparent 0px, transparent 88px,
+          rgba(0,0,0,0.2) 88px, rgba(0,0,0,0.2) 90px
+        );
+      background-size: 90px 30px;
+      background-position: 45px 15px;
+    }
+    .header-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+    }
+    .header-content {
+      position: relative;
+      z-index: 2;
+      padding: 18px 16px 14px;
+      color: white;
+    }
+    .header-sign {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: #111;
+      border: 2px solid #FFD700;
+      border-radius: 8px;
+      padding: 10px 20px;
+      margin-bottom: 10px;
+    }
+    .header-sign-icon {
+      font-size: 28px;
+      background: #e63012;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .header-sign-text {}
+    .header-sign-text .line1 {
+      font-size: 20px;
+      font-weight: 900;
+      color: #e63012;
+      font-family: Arial Black, sans-serif;
+      line-height: 1.1;
+    }
+    .header-sign-text .line2 {
+      font-size: 16px;
+      font-weight: 900;
+      color: #FFD700;
+      font-family: Arial Black, sans-serif;
+      line-height: 1.1;
+    }
+    .header-sub { font-size: 12px; color: rgba(255,255,255,0.85); margin-top: 2px; }
+    .header-info { display: flex; gap: 16px; margin-top: 6px; font-size: 12px; color: rgba(255,255,255,0.8); }
 
     /* НАВИГАЦИЯ ПО КАТЕГОРИЯМ */
     .categories {
@@ -249,11 +325,21 @@
 <body>
 
 <header>
-  <h1>🍕 Пицца & Шаверма</h1>
-  <p>Быстро, вкусно, с доставкой по Ставрополю</p>
-  <div class="header-info">
-    <span>⏰ Ежедневно 10:00-23:00</span>
-    <span>📍 ул. Чапаева, 4/1е</span>
+  <div class="header-bricks"></div>
+  <div class="header-overlay"></div>
+  <div class="header-content">
+    <div class="header-sign">
+      <div class="header-sign-icon">🍕</div>
+      <div class="header-sign-text">
+        <div class="line1">Pizza Hot</div>
+        <div class="line2">Shaverma Tasty</div>
+      </div>
+    </div>
+    <div class="header-sub">Быстро, вкусно, с доставкой по Ставрополю</div>
+    <div class="header-info">
+      <span>⏰ Ежедневно 10:00-23:00</span>
+      <span>📍 ул. Чапаева, 4/1е</span>
+    </div>
   </div>
 </header>
 
